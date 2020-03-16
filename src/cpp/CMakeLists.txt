@@ -101,6 +101,7 @@ set(${PROJECT_NAME}_source_files
     dds/domain/DomainParticipantFactory.cpp
     dds/domain/DomainParticipantImpl.cpp
     dds/domain/DomainParticipant.cpp
+    fastdds/domain/qos/DomainParticipantQos.cpp
     dds/builtin/typelookup/common/TypeLookupTypes.cpp
     dds/builtin/common/RPCHeadersImpl.cpp
     dds/builtin/typelookup/TypeLookupManager.cpp
