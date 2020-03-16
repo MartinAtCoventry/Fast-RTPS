@@ -27,16 +27,17 @@
 
 #include <fastdds/dds/publisher/qos/PublisherQos.hpp>
 #include <fastdds/dds/subscriber/qos/SubscriberQos.hpp>
+#include <fastdds/dds/domain/qos/DomainParticipantQos.hpp>
 
 #include <fastdds/dds/topic/TypeSupport.hpp>
 #include <fastrtps/types/TypesBase.h>
 
 using eprosima::fastrtps::types::ReturnCode_t;
 
-namespace eprosima{
-namespace fastrtps{
+namespace eprosima {
+namespace fastrtps {
 
-namespace rtps{
+namespace rtps {
 
 class RTPSParticipant;
 class WriterProxyData;
@@ -74,6 +75,11 @@ private:
     DomainParticipantImpl(
             const fastrtps::ParticipantAttributes& patt,
             DomainParticipant* pspart,
+            DomainParticipantListener* listen = nullptr);
+
+    DomainParticipantImpl(
+            DomainParticipant* dp,
+            const DomainParticipantQos& qos,
             DomainParticipantListener* listen = nullptr);
 
     virtual ~DomainParticipantImpl();
@@ -139,7 +145,7 @@ public:
      * @return True if registered.
      */
     bool register_dynamic_type_to_factories(
-        const std::string& type_name) const;
+            const std::string& type_name) const;
 
     /**
      * Unregister a type in this participant.
@@ -154,24 +160,24 @@ public:
     // TODO Subscriber* get_builtin_subscriber();
 
     /* TODO
-    bool ignore_participant(
+       bool ignore_participant(
             const fastrtps::rtps::InstanceHandle_t& handle);
-    */
+     */
 
     /* TODO
-    bool ignore_topic(
+       bool ignore_topic(
             const fastrtps::rtps::InstanceHandle_t& handle);
-    */
+     */
 
     /* TODO
-    bool ignore_publication(
+       bool ignore_publication(
             const fastrtps::rtps::InstanceHandle_t& handle);
-    */
+     */
 
     /* TODO
-    bool ignore_subscription(
+       bool ignore_subscription(
             const fastrtps::rtps::InstanceHandle_t& handle);
-    */
+     */
 
     uint8_t get_domain_id() const;
 
@@ -192,26 +198,26 @@ public:
     // TODO Get/Set default Topic Qos
 
     /* TODO
-    bool get_discovered_participants(
+       bool get_discovered_participants(
             std::vector<fastrtps::rtps::InstanceHandle_t>& participant_handles) const;
-    */
+     */
 
     /* TODO
-    bool get_discovered_participant_data(
+       bool get_discovered_participant_data(
             ParticipantBuiltinTopicData& participant_data,
             const fastrtps::rtps::InstanceHandle_t& participant_handle) const;
-    */
+     */
 
     /* TODO
-    bool get_discovered_topics(
+       bool get_discovered_topics(
             std::vector<fastrtps::rtps::InstanceHandle_t>& topic_handles) const;
-    */
+     */
 
     /* TODO
-    bool get_discovered_topic_data(
+       bool get_discovered_topic_data(
             TopicBuiltinTopicData& topic_data,
             const fastrtps::rtps::InstanceHandle_t& topic_handle) const;
-    */
+     */
 
     bool contains_entity(
             const fastrtps::rtps::InstanceHandle_t& handle,
@@ -322,65 +328,68 @@ private:
 
     // register_remote_type parent request, type_name, callback relationship.
     std::map<fastrtps::rtps::SampleIdentity,
-             std::pair<std::string, std::function<void(
-                                        const std::string& name,
-                                        const fastrtps::types::DynamicType_ptr)>>> register_callbacks_;
+            std::pair<std::string, std::function<void(
+                const std::string& name,
+                const fastrtps::types::DynamicType_ptr)> > > register_callbacks_;
 
     // Relationship between child and parent request
     std::map<fastrtps::rtps::SampleIdentity, fastrtps::rtps::SampleIdentity> child_requests_;
 
     // All parent's child requests
-    std::map<fastrtps::rtps::SampleIdentity, std::vector<fastrtps::rtps::SampleIdentity>> parent_requests_;
+    std::map<fastrtps::rtps::SampleIdentity, std::vector<fastrtps::rtps::SampleIdentity> > parent_requests_;
 
     class MyRTPSParticipantListener : public fastrtps::rtps::RTPSParticipantListener
     {
-        public:
+public:
 
-            MyRTPSParticipantListener(DomainParticipantImpl* impl)
-                : participant_(impl)
-            {}
+        MyRTPSParticipantListener(
+                DomainParticipantImpl* impl)
+            : participant_(impl)
+        {
+        }
 
-            virtual ~MyRTPSParticipantListener() override
-            {}
+        virtual ~MyRTPSParticipantListener() override
+        {
+        }
 
-            void onParticipantDiscovery(
-                    fastrtps::rtps::RTPSParticipant* participant,
-                    fastrtps::rtps::ParticipantDiscoveryInfo&& info) override;
+        void onParticipantDiscovery(
+                fastrtps::rtps::RTPSParticipant* participant,
+                fastrtps::rtps::ParticipantDiscoveryInfo&& info) override;
 
 #if HAVE_SECURITY
-            void onParticipantAuthentication(
-                    fastrtps::rtps::RTPSParticipant* participant,
-                    fastrtps::rtps::ParticipantAuthenticationInfo&& info) override;
+        void onParticipantAuthentication(
+                fastrtps::rtps::RTPSParticipant* participant,
+                fastrtps::rtps::ParticipantAuthenticationInfo&& info) override;
 #endif
 
-            void onReaderDiscovery(
-                    fastrtps::rtps::RTPSParticipant* participant,
-                    fastrtps::rtps::ReaderDiscoveryInfo&& info) override;
+        void onReaderDiscovery(
+                fastrtps::rtps::RTPSParticipant* participant,
+                fastrtps::rtps::ReaderDiscoveryInfo&& info) override;
 
-            void onWriterDiscovery(
-                    fastrtps::rtps::RTPSParticipant* participant,
-                    fastrtps::rtps::WriterDiscoveryInfo&& info) override;
+        void onWriterDiscovery(
+                fastrtps::rtps::RTPSParticipant* participant,
+                fastrtps::rtps::WriterDiscoveryInfo&& info) override;
 
-            void on_type_discovery(
-                    fastrtps::rtps::RTPSParticipant* participant,
-                    const fastrtps::rtps::SampleIdentity& request_sample_id,
-                    const fastrtps::string_255& topic,
-                    const fastrtps::types::TypeIdentifier* identifier,
-                    const fastrtps::types::TypeObject* object,
-                    fastrtps::types::DynamicType_ptr dyn_type) override;
+        void on_type_discovery(
+                fastrtps::rtps::RTPSParticipant* participant,
+                const fastrtps::rtps::SampleIdentity& request_sample_id,
+                const fastrtps::string_255& topic,
+                const fastrtps::types::TypeIdentifier* identifier,
+                const fastrtps::types::TypeObject* object,
+                fastrtps::types::DynamicType_ptr dyn_type) override;
 
-            void on_type_dependencies_reply(
-                    fastrtps::rtps::RTPSParticipant* participant,
-                    const fastrtps::rtps::SampleIdentity& request_sample_id,
-                    const fastrtps::types::TypeIdentifierWithSizeSeq& dependencies) override;
+        void on_type_dependencies_reply(
+                fastrtps::rtps::RTPSParticipant* participant,
+                const fastrtps::rtps::SampleIdentity& request_sample_id,
+                const fastrtps::types::TypeIdentifierWithSizeSeq& dependencies) override;
 
-            void on_type_information_received(
-                    fastrtps::rtps::RTPSParticipant* participant,
-                    const fastrtps::string_255& topic_name,
-                    const fastrtps::string_255& type_name,
-                    const fastrtps::types::TypeInformation& type_information) override;
+        void on_type_information_received(
+                fastrtps::rtps::RTPSParticipant* participant,
+                const fastrtps::string_255& topic_name,
+                const fastrtps::string_255& type_name,
+                const fastrtps::types::TypeInformation& type_information) override;
 
-            DomainParticipantImpl* participant_;
+        DomainParticipantImpl* participant_;
 
     } rtps_listener_;
 
