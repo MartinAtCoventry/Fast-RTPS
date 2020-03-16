@@ -23,6 +23,7 @@
 #include <fastrtps/attributes/ParticipantAttributes.h>
 #include <fastrtps/types/TypesBase.h>
 #include <fastdds/dds/domain/qos/DomainParticipantQos.hpp>
+#include <fastdds/dds/domain/qos/DomainParticipantFactoryQos.hpp>
 #include <fastdds/dds/core/status/StatusMask.hpp>
 
 #include <mutex>
@@ -104,16 +105,16 @@ public:
      * @return
      */
     RTPS_DllAPI std::vector<DomainParticipant*> lookup_participants(
-        uint8_t domain_id) const;
+            uint8_t domain_id) const;
 
     //!Fills participant_attributes with the default values.
     RTPS_DllAPI ReturnCode_t get_default_participant_qos(
             fastrtps::ParticipantAttributes& participant_qos) const;
 
     /* TODO
-    RTPS_DllAPI ReturnCode_t set_default_participant_qos(
+       RTPS_DllAPI ReturnCode_t set_default_participant_qos(
             const fastrtps::ParticipantAttributes& participant_qos);
-    */
+     */
 
     /**
      * Remove a Participant and all associated publishers and subscribers.
@@ -137,7 +138,7 @@ private:
 
     friend class DomainParticipantFactoryReleaser;
 
-    std::map<uint8_t, std::vector<DomainParticipantImpl*>> participants_;
+    std::map<uint8_t, std::vector<DomainParticipantImpl*> > participants_;
 
     DomainParticipantFactory();
 
@@ -149,6 +150,7 @@ private:
 
     mutable bool default_xml_profiles_loaded;
 
+    DomainParticipantFactoryQos factory_qos_;
 
 };
 
